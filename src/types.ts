@@ -297,3 +297,83 @@ export interface DetectionDiagnostics {
   rightEyeWidthPx?: number;
 }
 
+export type AppRoute =
+  | 'home'
+  | 'setup'
+  | 'assessment'
+  | 'monitoring'
+  | 'history'
+  | 'reports'
+  | 'settings'
+  | 'about';
+
+export type CameraErrorCode =
+  | 'NO_CAMERA_FOUND'
+  | 'CAMERA_PERMISSION_DENIED'
+  | 'CAMERA_DISCONNECTED'
+  | 'CAMERA_IN_USE'
+  | 'MODEL_LOAD_FAILED';
+
+export interface CameraErrorInfo {
+  code: CameraErrorCode;
+  title: string;
+  message: string;
+  guidance: string;
+}
+
+export interface CameraDeviceOption {
+  deviceId: string;
+  label: string;
+}
+
+export interface AppSettings {
+  theme: 'dark' | 'light';
+  startupPage: 'home' | 'monitoring' | 'assessment';
+  language: 'en';
+  defaultCameraId: string;
+  resolution: '640x480' | '1280x720' | '1920x1080';
+  defaultAssessmentDuration: 10 | 30 | 60 | 120;
+  showOverlaysByDefault: boolean;
+  pauseOnTabHidden: boolean;
+  enablePostureWeight: boolean;
+  desktopNotificationsEnabled: boolean;
+  diagnosticsMode: boolean;
+  privacyAccepted: boolean;
+}
+
+export interface SavedSessionRecord {
+  id: string;
+  sessionType: 'monitoring' | 'assessment';
+  startedAt: number;
+  endedAt: number;
+  dateStr: string;
+  startTimeStr: string;
+  durationSec: number;
+  validTrackingSec: number;
+  invalidTrackingSec: number;
+  detectionQualityPct: number;
+  avgFatigueScore: number;
+  maxFatigueScore: number;
+  minFatigueScore: number;
+  avgPersonalDeviation: number;
+  avgAbsoluteScore: number;
+  kssRating: KssRating | null;
+  microsleepEvents: MicrosleepEventLog[];
+  categoryDurationsSec: Record<string, number>;
+  blinkSummary: {
+    totalBlinks: number;
+    avgBlinkRate: number;
+    avgBlinkDuration: number;
+    longBlinks: number;
+    avgPerclos: number;
+  };
+  yawnSummary: {
+    totalYawns: number;
+    avgYawnsPerMin: number;
+    avgYawnDuration: number;
+  };
+  history: SessionDataPoint[];
+  limitationsNote: string;
+}
+
+

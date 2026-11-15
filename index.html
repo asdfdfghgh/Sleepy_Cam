@@ -3,7 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SleepyCam AI - Real-Time Fatigue & Sleepiness Detection</title>
+    <title>SleepyCam AI - Real-Time Fatigue &amp; Sleepiness Detection</title>
+    <meta name="description" content="Multi-modal real-time webcam fatigue and sleepiness detection system analyzing eye metrics (EAR, PERCLOS), yawning (MAR), head pose, posture, and facial activity with personalized baseline calibration and machine learning." />
+    <meta property="og:title" content="SleepyCam AI - Real-Time Fatigue &amp; Sleepiness Detection" />
+    <meta property="og:description" content="Multi-modal real-time webcam fatigue and sleepiness detection system analyzing eye metrics (EAR, PERCLOS), yawning (MAR), head pose, posture, and facial activity with personalized baseline calibration and machine learning." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- PWA & Platform Meta Tags -->
+    <meta name="theme-color" content="#cecbcb" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SleepyCam" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+
+    <!-- Typography (2+1 Rule: Plus Jakarta Sans + DM Sans + JetBrains Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Initial Theme Sync (Robot Studio Grey Default) -->
+    <script>
+      (function() {
+        try {
+          var raw = localStorage.getItem('sleepycam_settings');
+          if (raw && JSON.parse(raw).theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (_) {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+
     <!-- Defensive shim for iframe environments and TFLite Emscripten stderr redirection -->
     <script>
       (function() {
@@ -31,8 +68,6 @@
           }
         } catch (_) {}
 
-        // TFLite / Emscripten outputs benign status messages (INFO: Created TensorFlow Lite XNNPACK delegate...) to stderr
-        // which Emscripten routes to console.error. Reroute them to console.info so the dev supervisor doesn't treat them as crashes.
         try {
           var _origError = console.error;
           console.error = function() {
@@ -73,15 +108,9 @@
         }, true);
       })();
     </script>
-    <meta name="description" content="Multi-modal real-time webcam fatigue and sleepiness detection system analyzing eye metrics (EAR, PERCLOS), yawning (MAR), head pose, posture, and facial activity with personalized baseline calibration and machine learning." />
-    <meta property="og:title" content="SleepyCam AI - Real-Time Fatigue & Sleepiness Detection" />
-    <meta property="og:description" content="Multi-modal real-time webcam fatigue and sleepiness detection system analyzing eye metrics (EAR, PERCLOS), yawning (MAR), head pose, posture, and facial activity with personalized baseline calibration and machine learning." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body>
+  <body class="bg-[#cecbcb] dark:bg-[#111317] text-[#0a0b0e] dark:text-[#f4f6f8] antialiased selection:bg-[#00ffc6]/30">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

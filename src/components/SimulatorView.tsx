@@ -249,12 +249,12 @@ export const SimulatorView: React.FC<SimulatorViewProps> = ({
             Multimodal Feature Contributions:
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-            <ContributionRow label="PERCLOS (w=0.28)" value={components.perclos} color="#ef4444" />
-            <ContributionRow label="Eye Closures (w=0.20)" value={components.eyeClosure} color="#f97316" />
-            <ContributionRow label="Yawn Dynamics (w=0.14)" value={components.yawn} color="#eab308" />
-            <ContributionRow label="Head Nodding (w=0.14)" value={components.headKinematics} color="#8b5cf6" />
-            <ContributionRow label="Blink Frequency (w=0.10)" value={components.blinkRate} color="#06b6d4" />
-            <ContributionRow label="Posture Degradation (w=0.08)" value={components.posture} color="#10b981" />
+            <ContributionRow label="PERCLOS (w=0.30)" value={components.perclos} color="#ef4444" />
+            <ContributionRow label="Eye Closures (w=0.25)" value={components.prolongedClosures} color="#f97316" />
+            <ContributionRow label="Blink Abnormalities (w=0.20)" value={components.blinkAbnormalities} color="#8b5cf6" />
+            <ContributionRow label="Yawn Dynamics (w=0.10)" value={components.yawn} color="#eab308" />
+            <ContributionRow label="Posture Degradation (w=0.05)" value={components.postureChanges} color="#10b981" />
+            <ContributionRow label="Head Nodding (w=0.00)" value={components.headNodding} color="#06b6d4" />
           </div>
         </div>
       </div>

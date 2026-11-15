@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="112" fill="#090B0E"/>
+  <rect x="16" y="16" width="480" height="480" rx="98" stroke="#1E242D" stroke-width="6"/>
+  <!-- Stylized Precision Eye Aperture -->
+  <path d="M84 256C128 168 190 128 256 128C322 128 384 168 428 256C384 344 322 384 256 384C190 384 128 344 84 256Z" stroke="#2DD4BF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="256" r="76" stroke="#14B8A6" stroke-width="18"/>
+  <circle cx="256" cy="256" r="32" fill="#34D399"/>
+  <!-- Subtle Focus Brackets -->
+  <path d="M128 148V116H160" stroke="#2DD4BF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <path d="M384 148V116H352" stroke="#2DD4BF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <path d="M128 364V396H160" stroke="#2DD4BF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <path d="M384 364V396H352" stroke="#2DD4BF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+</svg>
