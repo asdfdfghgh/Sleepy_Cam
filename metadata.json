@@ -1,0 +1,10 @@
+{
+  "name": "SleepyCam AI - Real-Time Fatigue & Sleepiness Detection",
+  "description": "Multi-modal real-time webcam fatigue and sleepiness detection system analyzing eye metrics (EAR, PERCLOS), yawning (MAR), head pose, posture, and facial activity with personalized baseline calibration and machine learning.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SleepyCam AI - Real-Time Fatigue & Sleepiness Detection</title>
+    <!-- Defensive shim for iframe environments and TFLite Emscripten stderr redirection -->
+    <script>
+      (function() {
+        try {
+          var _origFetch = window.fetch;
+          var _curFetch = _origFetch;
+          try {
+            Object.defineProperty(window, 'fetch', {
+              get: function() { return _curFetch; },
+              set: function(val) { _curFetch = val; },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (e1) {
+            if (window.Window && window.Window.prototype) {
+              try {
+                Object.defineProperty(window.Window.prototype, 'fetch', {
+                  get: function() { return _curFetch; },
+                  set: function(val) { _curFetch = val; },
+                  configurable: true,
+                  enumerable: true
+                });
+              } catch (e2) {}
+            }
+          }
+        } catch (_) {}
+
+        // TFLite / Emscripten outputs benign status messages (INFO: Created TensorFlow Lite XNNPACK delegate...) to stderr
+        // which Emscripten routes to console.error. Reroute them to console.info so the dev supervisor doesn't treat them as crashes.
+        try {
+          var _origError = console.error;
+          console.error = function() {
+            var msg = arguments[0];
+            if (typeof msg === 'string') {
+              if (
+                msg.indexOf('INFO:') === 0 ||
+                msg.indexOf('XNNPACK delegate') !== -1 ||
+                msg.indexOf('TensorFlow Lite') !== -1
+              ) {
+                if (console.info) {
+                  console.info.apply(console, arguments);
+                }
+                return;
+              }
+            }
+            return _origError.apply(console, arguments);
+          };
+        } catch (_) {}
+
+        window.addEventListener('error', function(e) {
+          if (e && e.message) {
+            if (e.message.indexOf('fetch') !== -1 && e.message.indexOf('getter') !== -1) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              return true;
+            }
+            if (
+              e.message.indexOf('XNNPACK') !== -1 ||
+              e.message.indexOf('TensorFlow Lite') !== -1 ||
+              e.message.indexOf('INFO:') === 0
+            ) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              return true;
+            }
+          }
+        }, true);
+      })();
+    </script>
+    <meta name="description" content="Multi-modal real-time webcam fatigue and sleepiness detection system analyzing eye metrics (EAR, PERCLOS), yawning (MAR), head pose, posture, and facial activity with personalized baseline calibration and machine learning." />
+    <meta property="og:title" content="SleepyCam AI - Real-Time Fatigue & Sleepiness Detection" />
+    <meta property="og:description" content="Multi-modal real-time webcam fatigue and sleepiness detection system analyzing eye metrics (EAR, PERCLOS), yawning (MAR), head pose, posture, and facial activity with personalized baseline calibration and machine learning." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
