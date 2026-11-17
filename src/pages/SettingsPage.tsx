@@ -5,10 +5,12 @@ import {
   Trash2,
   Download,
   Bell,
-  ShieldCheck
+  ShieldCheck,
+  FileJson
 } from 'lucide-react';
 import { useAppContext } from '../hooks/useAppContext';
 import { storageService } from '../services/StorageService';
+import { reportService } from '../services/ReportService';
 import { platformAdapter } from '../services/PlatformAdapter';
 import { audioAlert } from '../utils/audioAlertEngine';
 import { Card, Button, Toggle } from '../components/ui/Primitives';
@@ -24,6 +26,8 @@ export const SettingsPage: React.FC = () => {
     updateAudioConfig,
     sessions,
     clearAllSessionRecords,
+    feedbackRecords,
+    clearAllFeedbackRecords,
     wipeAllData,
     cameras,
     refreshCameras,
@@ -300,7 +304,9 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          IndexedDB stores <strong>{sessions.length}</strong> session summaries and{' '}
+          IndexedDB stores <strong>{sessions.length}</strong> session summaries,{' '}
+          <strong>{feedbackRecords.length}</strong> labelled feedback{' '}
+          {feedbackRecords.length === 1 ? 'record' : 'records'}, and{' '}
           <strong>{baseline.isCalibrated ? '1 calibrated profile' : 'no profile'}</strong>. Zero
           video frames are stored or uploaded.
         </p>
@@ -310,11 +316,43 @@ export const SettingsPage: React.FC = () => {
             <Download className="w-3.5 h-3.5" />
             <span>Export JSON Backup</span>
           </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={feedbackRecords.length === 0}
+            onClick={() => {
+              reportService.exportFeedbackCsv(feedbackRecords);
+              showToast('Exported feedback dataset as CSV', 'success');
+            }}
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Feedback CSV</span>
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={feedbackRecords.length === 0}
+            onClick={() => {
+              reportService.exportFeedbackJson(feedbackRecords);
+              showToast('Exported feedback dataset as JSON', 'success');
+            }}
+          >
+            <FileJson className="w-3.5 h-3.5" />
+            <span>Feedback JSON</span>
+          </Button>
           <Button variant="secondary" size="sm" onClick={() => clearBaseline()}>
             <span>Clear Calibration</span>
           </Button>
           <Button variant="secondary" size="sm" onClick={() => clearAllSessionRecords()}>
             <span>Clear History</span>
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={feedbackRecords.length === 0}
+            onClick={() => clearAllFeedbackRecords()}
+          >
+            <span>Clear Feedback</span>
           </Button>
           {!confirmWipe ? (
             <Button variant="danger" size="sm" onClick={() => setConfirmWipe(true)}>

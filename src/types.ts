@@ -376,4 +376,39 @@ export interface SavedSessionRecord {
   limitationsNote: string;
 }
 
+export type SelfReportedFatigueLevel =
+  | 'Not fatigued'
+  | 'Mildly fatigued'
+  | 'Moderately fatigued'
+  | 'Severely fatigued';
 
+export interface AssessmentFeedbackMetrics {
+  avgEar: number | null;
+  perclosPct: number | null;
+  blinkFrequencyPerMin: number | null;
+  totalBlinks: number | null;
+  yawnEvents: number | null;
+  yawnsPerMin: number | null;
+  microsleepEventsCount: number;
+  predictedFatigueScore: number | null;
+  predictedAbsoluteScore: number | null;
+  predictedPersonalDeviation: number | null;
+  predictedTier: string | null;
+  detectionQualityPct: number;
+  validTrackingSec: number;
+  durationSec: number;
+}
+
+export interface AssessmentFeedbackRecord {
+  id: string;
+  sessionId: string;
+  sessionType: 'assessment' | 'monitoring';
+  assessmentTimestamp: number;
+  assessmentTimestampIso: string;
+  recordedAt: number;
+  recordedAtIso: string;
+  isAccurate: boolean;
+  selfReportedFatigueLevel: SelfReportedFatigueLevel | null;
+  metrics: AssessmentFeedbackMetrics;
+  notes: string;
+}

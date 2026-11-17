@@ -16,6 +16,7 @@ import { DESIGN_TOKENS } from '../styles/designTokens';
 import { Card, Button, ProgressBar } from '../components/ui/Primitives';
 import { VideoStage } from '../components/monitoring/VideoStage';
 import { KssModal } from '../components/monitoring/KssModal';
+import { PostAssessmentFeedbackCard } from '../components/monitoring/PostAssessmentFeedbackCard';
 import { SegmentedControl } from '../components/21st/InteractiveControls';
 import { CircularGauge } from '../components/21st/CircularGauge';
 import { NumberTicker } from '../components/21st/NumberTicker';
@@ -253,6 +254,9 @@ export const QuickAssessmentPage: React.FC = () => {
                 />
               </Card>
             </div>
+
+            {/* Post-Assessment Labelled Feedback Loop */}
+            <PostAssessmentFeedbackCard session={completed} />
           </motion.div>
         ) : (
           <motion.div

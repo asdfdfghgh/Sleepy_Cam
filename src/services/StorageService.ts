@@ -1,5 +1,6 @@
 import {
   AppSettings,
+  AssessmentFeedbackRecord,
   AudioAlertConfig,
   BaselineData,
   KssRating,
@@ -8,9 +9,11 @@ import {
 import { DEFAULT_AUDIO_CONFIG } from '../utils/audioAlertEngine';
 
 const DB_NAME = 'sleepycam_db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_SESSIONS = 'sessions';
 const STORE_KV = 'kv_store';
+const STORE_FEEDBACK = 'assessment_feedback';
+const LS_FEEDBACK_KEY = 'sleepycam_assessment_feedback';
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   theme: 'light',
@@ -60,6 +63,11 @@ class StorageServiceClass {
         }
         if (!db.objectStoreNames.contains(STORE_KV)) {
           db.createObjectStore(STORE_KV, { keyPath: 'key' });
+        }
+        if (!db.objectStoreNames.contains(STORE_FEEDBACK)) {
+          const fbStore = db.createObjectStore(STORE_FEEDBACK, { keyPath: 'id' });
+          fbStore.createIndex('recordedAt', 'recordedAt', { unique: false });
+          fbStore.createIndex('sessionId', 'sessionId', { unique: false });
         }
       };
       request.onsuccess = () => resolve(request.result);
@@ -237,26 +245,115 @@ class StorageServiceClass {
     } catch {}
   }
 
+  public async listFeedback(): Promise<AssessmentFeedbackRecord[]> {
+    try {
+      const db = await this.openDb();
+      const rows = await new Promise<AssessmentFeedbackRecord[]>((resolve, reject) => {
+        const tx = db.transaction(STORE_FEEDBACK, 'readonly');
+        const req = tx.objectStore(STORE_FEEDBACK).getAll();
+        req.onsuccess = () => resolve((req.result as AssessmentFeedbackRecord[]) || []);
+        req.onerror = () => reject(req.error);
+      });
+      if (rows.length > 0) {
+        return rows.sort((a, b) => b.recordedAt - a.recordedAt);
+      }
+    } catch {
+      // Fall back to localStorage below
+    }
+
+    try {
+      const raw = localStorage.getItem(LS_FEEDBACK_KEY);
+      const parsed = raw ? (JSON.parse(raw) as AssessmentFeedbackRecord[]) : [];
+      return parsed.sort((a, b) => b.recordedAt - a.recordedAt);
+    } catch {
+      return [];
+    }
+  }
+
+  public async saveFeedback(record: AssessmentFeedbackRecord): Promise<void> {
+    try {
+      const raw = localStorage.getItem(LS_FEEDBACK_KEY);
+      const existing = raw ? (JSON.parse(raw) as AssessmentFeedbackRecord[]) : [];
+      const next = [record, ...existing.filter((r) => r.id !== record.id)];
+      localStorage.setItem(LS_FEEDBACK_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore localStorage quota errors
+    }
+
+    try {
+      const db = await this.openDb();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(STORE_FEEDBACK, 'readwrite');
+        tx.objectStore(STORE_FEEDBACK).put(record);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch {
+      // Fallback already persisted in localStorage
+    }
+  }
+
+  public async deleteFeedback(id: string): Promise<void> {
+    try {
+      const raw = localStorage.getItem(LS_FEEDBACK_KEY);
+      if (raw) {
+        const existing = JSON.parse(raw) as AssessmentFeedbackRecord[];
+        localStorage.setItem(
+          LS_FEEDBACK_KEY,
+          JSON.stringify(existing.filter((r) => r.id !== id))
+        );
+      }
+    } catch {}
+
+    try {
+      const db = await this.openDb();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(STORE_FEEDBACK, 'readwrite');
+        tx.objectStore(STORE_FEEDBACK).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch {}
+  }
+
+  public async clearAllFeedback(): Promise<void> {
+    try {
+      localStorage.removeItem(LS_FEEDBACK_KEY);
+    } catch {}
+
+    try {
+      const db = await this.openDb();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(STORE_FEEDBACK, 'readwrite');
+        tx.objectStore(STORE_FEEDBACK).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch {}
+  }
+
   public async exportAllDataJson(): Promise<string> {
-    const [settings, calibration, kss, audioConfig, sessions] = await Promise.all([
+    const [settings, calibration, kss, audioConfig, sessions, feedbackRecords] = await Promise.all([
       this.getSettings(),
       this.getCalibration(),
       this.getKssRating(),
       this.getAudioConfig(),
-      this.listSessions()
+      this.listSessions(),
+      this.listFeedback()
     ]);
 
     return JSON.stringify(
       {
         application: 'SleepyCam AI',
-        schemaVersion: '2.0.0',
+        schemaVersion: '2.1.0',
         exportedAt: new Date().toISOString(),
         privacyNote: '100% local data export; contains no raw camera frames or video recordings.',
         settings,
         calibration,
         lastKssRating: kss,
         audioConfig,
-        sessions
+        sessions,
+        feedbackRecords
       },
       null,
       2
@@ -266,6 +363,7 @@ class StorageServiceClass {
   public async deleteAllLocalData(): Promise<void> {
     await Promise.all([
       this.clearAllSessions(),
+      this.clearAllFeedback(),
       this.clearCalibration(),
       this.deleteKv('settings'),
       this.deleteKv('kss'),

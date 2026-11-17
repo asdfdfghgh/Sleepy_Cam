@@ -21,6 +21,7 @@ import {
   CategoryDonutChart,
   DonutSegment
 } from '../components/21st/AnalyticsCharts';
+import { PostAssessmentFeedbackCard } from '../components/monitoring/PostAssessmentFeedbackCard';
 import { SegmentedControl } from '../components/21st/InteractiveControls';
 import {
   Timeline,
@@ -352,6 +353,8 @@ export const ReportsPage: React.FC = () => {
           </Timeline>
         )}
       </Card>
+
+      <PostAssessmentFeedbackCard session={activeSession} />
 
       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
         Notice: {activeSession.limitationsNote}

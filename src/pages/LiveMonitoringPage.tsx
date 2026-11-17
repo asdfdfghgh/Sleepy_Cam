@@ -24,6 +24,7 @@ import { VideoStage } from '../components/monitoring/VideoStage';
 import { KssModal } from '../components/monitoring/KssModal';
 import { CalibrationWizard } from '../components/monitoring/CalibrationWizard';
 import { ValidationSuitePanel } from '../components/monitoring/ValidationSuitePanel';
+import { PostAssessmentFeedbackCard } from '../components/monitoring/PostAssessmentFeedbackCard';
 import { CircularGauge } from '../components/21st/CircularGauge';
 import { NumberTicker } from '../components/21st/NumberTicker';
 import { SpotlightSurface } from '../components/21st/SpotlightSurface';
@@ -139,25 +140,29 @@ export const LiveMonitoringPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Saved Session Notice */}
+      {/* Saved Session Notice & Optional Post-Session Feedback */}
       {monitor.completedMonitorSession && monitor.runState === 'idle' && (
-        <Card className="px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-xs font-mono text-zinc-700 dark:text-zinc-200 tabular-nums">
-            SAVED · {monitor.completedMonitorSession.durationSec.toFixed(0)}s · AVG{' '}
-            <strong className="text-[#007a5f] dark:text-[#00ffc6]">
-              {monitor.completedMonitorSession.avgFatigueScore.toFixed(1)}
-            </strong>
-            /100
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => openSessionReport(monitor.completedMonitorSession!.id)}
-          >
-            <FileBarChart className="w-3.5 h-3.5" />
-            <span>Full Report</span>
-          </Button>
-        </Card>
+        <div className="space-y-4">
+          <Card className="px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div className="text-xs font-mono text-zinc-700 dark:text-zinc-200 tabular-nums">
+              SAVED · {monitor.completedMonitorSession.durationSec.toFixed(0)}s · AVG{' '}
+              <strong className="text-[#007a5f] dark:text-[#00ffc6]">
+                {monitor.completedMonitorSession.avgFatigueScore.toFixed(1)}
+              </strong>
+              /100
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => openSessionReport(monitor.completedMonitorSession!.id)}
+            >
+              <FileBarChart className="w-3.5 h-3.5" />
+              <span>Full Report</span>
+            </Button>
+          </Card>
+
+          <PostAssessmentFeedbackCard session={monitor.completedMonitorSession} />
+        </div>
       )}
 
       {/* Main HUD Workspace */}

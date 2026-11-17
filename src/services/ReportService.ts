@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { SavedSessionRecord } from '../types';
+import { AssessmentFeedbackRecord, SavedSessionRecord } from '../types';
 
 class ReportServiceClass {
   public exportCsv(session: SavedSessionRecord): void {
@@ -193,6 +193,96 @@ class ReportServiceClass {
     if (typeof window !== 'undefined') {
       window.print();
     }
+  }
+
+  public exportFeedbackCsv(records: AssessmentFeedbackRecord[]): void {
+    const headers = [
+      'Feedback ID',
+      'Session ID',
+      'Session Type',
+      'Assessment Timestamp (ISO)',
+      'Feedback Recorded At (ISO)',
+      'Results Accurate',
+      'Self-Reported Fatigue Level',
+      'Predicted Fatigue Score (0-100)',
+      'Predicted Absolute Score (0-100)',
+      'Predicted Personal Deviation (0-100)',
+      'Predicted Tier',
+      'Average EAR',
+      'PERCLOS (%)',
+      'Blink Frequency (/min)',
+      'Total Blinks',
+      'Yawn Events',
+      'Yawns (/min)',
+      'Microsleep Events',
+      'Detection Quality (%)',
+      'Valid Tracking (s)',
+      'Duration (s)'
+    ];
+
+    const fmt = (val: number | string | boolean | null | undefined): string => {
+      if (val === null || val === undefined) return '';
+      return String(val);
+    };
+
+    const rows = records.map((r) => [
+      r.id,
+      r.sessionId,
+      r.sessionType,
+      r.assessmentTimestampIso,
+      r.recordedAtIso,
+      r.isAccurate ? 'Yes' : 'No',
+      r.selfReportedFatigueLevel ?? '',
+      fmt(r.metrics.predictedFatigueScore),
+      fmt(r.metrics.predictedAbsoluteScore),
+      fmt(r.metrics.predictedPersonalDeviation),
+      r.metrics.predictedTier ?? '',
+      fmt(r.metrics.avgEar),
+      fmt(r.metrics.perclosPct),
+      fmt(r.metrics.blinkFrequencyPerMin),
+      fmt(r.metrics.totalBlinks),
+      fmt(r.metrics.yawnEvents),
+      fmt(r.metrics.yawnsPerMin),
+      fmt(r.metrics.microsleepEventsCount),
+      fmt(r.metrics.detectionQualityPct),
+      fmt(r.metrics.validTrackingSec),
+      fmt(r.metrics.durationSec)
+    ]);
+
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+      )
+    ].join('\n');
+
+    const dateTag = new Date().toISOString().slice(0, 10);
+    this.triggerDownload(
+      new Blob([csv], { type: 'text/csv;charset=utf-8;' }),
+      `sleepycam_feedback_dataset_${dateTag}.csv`
+    );
+  }
+
+  public exportFeedbackJson(records: AssessmentFeedbackRecord[]): void {
+    const payload = JSON.stringify(
+      {
+        application: 'SleepyCam AI v2.0',
+        datasetType: 'anonymised_post_assessment_feedback',
+        privacyNote:
+          'Local evaluation dataset only. Contains no webcam footage, facial images, or personal identifiers. Does not automatically modify or retrain the production model.',
+        exportedAt: new Date().toISOString(),
+        recordCount: records.length,
+        records
+      },
+      null,
+      2
+    );
+
+    const dateTag = new Date().toISOString().slice(0, 10);
+    this.triggerDownload(
+      new Blob([payload], { type: 'application/json' }),
+      `sleepycam_feedback_dataset_${dateTag}.json`
+    );
   }
 
   private triggerDownload(blob: Blob, filename: string): void {

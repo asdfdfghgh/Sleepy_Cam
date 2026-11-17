@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import {
   AppRoute,
   AppSettings,
+  AssessmentFeedbackRecord,
   AudioAlertConfig,
   BaselineData,
   CameraDeviceOption,
@@ -44,6 +45,10 @@ interface AppContextValue {
   saveSessionRecord: (record: SavedSessionRecord) => Promise<void>;
   deleteSessionRecord: (id: string) => Promise<void>;
   clearAllSessionRecords: () => Promise<void>;
+  feedbackRecords: AssessmentFeedbackRecord[];
+  submitAssessmentFeedback: (record: AssessmentFeedbackRecord) => Promise<void>;
+  deleteFeedbackRecord: (id: string) => Promise<void>;
+  clearAllFeedbackRecords: () => Promise<void>;
   wipeAllData: () => Promise<void>;
   selectedReportId: string | null;
   openSessionReport: (id: string) => void;
@@ -64,6 +69,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [audioConfig, setAudioConfig] = useState<AudioAlertConfig>(DEFAULT_AUDIO_CONFIG);
   const [fatigueWeights, setFatigueWeights] = useState<FatigueWeightConfig>(DEFAULT_FATIGUE_WEIGHTS);
   const [sessions, setSessions] = useState<SavedSessionRecord[]>([]);
+  const [feedbackRecords, setFeedbackRecords] = useState<AssessmentFeedbackRecord[]>([]);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [cameras, setCameras] = useState<CameraDeviceOption[]>([]);
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -105,25 +111,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       storageService.getKssRating(),
       storageService.getAudioConfig(),
       storageService.listSessions(),
+      storageService.listFeedback(),
       cameraService.listVideoDevices()
-    ]).then(([loadedSettings, loadedBaseline, loadedKss, loadedAudio, loadedSessions, camList]) => {
-      if (!mounted) return;
-      setSettings(loadedSettings);
-      applyThemeToDom(loadedSettings.theme);
-      setBaseline(loadedBaseline);
-      setKssRating(loadedKss);
-      setAudioConfig(loadedAudio);
-      audioAlert.updateConfig(loadedAudio);
-      setSessions(loadedSessions);
-      setCameras(camList);
-      if (loadedSessions.length > 0) {
-        setSelectedReportId(loadedSessions[0].id);
+    ]).then(
+      ([
+        loadedSettings,
+        loadedBaseline,
+        loadedKss,
+        loadedAudio,
+        loadedSessions,
+        loadedFeedback,
+        camList
+      ]) => {
+        if (!mounted) return;
+        setSettings(loadedSettings);
+        applyThemeToDom(loadedSettings.theme);
+        setBaseline(loadedBaseline);
+        setKssRating(loadedKss);
+        setAudioConfig(loadedAudio);
+        audioAlert.updateConfig(loadedAudio);
+        setSessions(loadedSessions);
+        setFeedbackRecords(loadedFeedback);
+        setCameras(camList);
+        if (loadedSessions.length > 0) {
+          setSelectedReportId(loadedSessions[0].id);
+        }
+        if (loadedSettings.startupPage && loadedSettings.startupPage !== 'home') {
+          setRoute(loadedSettings.startupPage);
+        }
+        setIsHydrated(true);
       }
-      if (loadedSettings.startupPage && loadedSettings.startupPage !== 'home') {
-        setRoute(loadedSettings.startupPage);
-      }
-      setIsHydrated(true);
-    });
+    );
 
     return () => {
       mounted = false;
@@ -221,6 +239,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('All saved session history cleared', 'info');
   }, [showToast]);
 
+  const submitAssessmentFeedback = useCallback(async (record: AssessmentFeedbackRecord) => {
+    await storageService.saveFeedback(record);
+    setFeedbackRecords((prev) => [record, ...prev.filter((r) => r.id !== record.id)]);
+  }, []);
+
+  const deleteFeedbackRecord = useCallback(
+    async (id: string) => {
+      await storageService.deleteFeedback(id);
+      setFeedbackRecords((prev) => prev.filter((r) => r.id !== id));
+      showToast('Feedback record deleted', 'info');
+    },
+    [showToast]
+  );
+
+  const clearAllFeedbackRecords = useCallback(async () => {
+    await storageService.clearAllFeedback();
+    setFeedbackRecords([]);
+    showToast('All labelled feedback records cleared', 'info');
+  }, [showToast]);
+
   const wipeAllData = useCallback(async () => {
     await storageService.deleteAllLocalData();
     setSettings(DEFAULT_APP_SETTINGS);
@@ -230,6 +268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const resetAudio = audioAlert.updateConfig(DEFAULT_AUDIO_CONFIG);
     setAudioConfig(resetAudio);
     setSessions([]);
+    setFeedbackRecords([]);
     setSelectedReportId(null);
     showToast('All local SleepyCam data deleted', 'warning');
   }, [applyThemeToDom, showToast]);
@@ -273,6 +312,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         saveSessionRecord,
         deleteSessionRecord,
         clearAllSessionRecords,
+        feedbackRecords,
+        submitAssessmentFeedback,
+        deleteFeedbackRecord,
+        clearAllFeedbackRecords,
         wipeAllData,
         selectedReportId,
         openSessionReport,

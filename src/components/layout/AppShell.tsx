@@ -21,6 +21,7 @@ import { useAppContext } from '../../hooks/useAppContext';
 import { PWAInstallButton } from '../pwa/PWAInstallButton';
 import { OfflineIndicator } from '../pwa/OfflineIndicator';
 import { RobotAntennaMark } from '../ui/robot-hero';
+import { DeveloperFooter } from './DeveloperFooter';
 import { cn } from '../../lib/utils';
 
 interface RailItem {
@@ -263,7 +264,10 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
         <OfflineIndicator />
 
-        <main className="flex-1 pb-20 lg:pb-8">{children}</main>
+        <main className="flex-1 flex flex-col pb-20 lg:pb-0">
+          <div className="flex-1">{children}</div>
+          <DeveloperFooter />
+        </main>
 
         {/* Mobile Bottom HUD Navigation Bar */}
         <nav
